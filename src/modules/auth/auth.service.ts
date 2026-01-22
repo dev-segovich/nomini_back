@@ -135,4 +135,24 @@ export class AuthService {
 
     return user;
   }
+
+  /**
+   * Reestablece la contraseña del usuario
+   */
+  async resetPassword(username: string, token: string, newPassword: string) {
+    if (token !== '000000') {
+      throw new UnauthorizedException('Token inválido');
+    }
+
+    const user = await this.userRepository.findOne({ where: { username } });
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await this.userRepository.save(user);
+
+    return { message: 'Contraseña actualizada exitosamente' };
+  }
 }

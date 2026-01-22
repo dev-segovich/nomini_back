@@ -30,7 +30,8 @@ export class EmployeesService {
       const filePath = join(uploadDir, filename);
       writeFileSync(filePath, data, 'base64');
 
-      return `http://localhost:3456/uploads/${filename}`;
+      const appUrl = process.env.APP_URL || 'http://localhost:3456';
+      return `${appUrl}/uploads/${filename}`;
     } catch (error) {
       console.error('Error saving image:', error);
       return base64;

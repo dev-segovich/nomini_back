@@ -37,14 +37,19 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
-  /**
-   * Endpoint para obtener el perfil del usuario autenticado
-   * GET /auth/profile
-   * Requiere token JWT en el header Authorization: Bearer <token>
-   */
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   async getProfile(@Request() req) {
     return this.authService.getProfile(req.user.id);
+  }
+
+  /**
+   * Endpoint para reestablecer la contraseña
+   * POST /auth/reset-password
+   */
+  @Post('reset-password')
+  async resetPassword(@Body() body: any) {
+    const { username, token, newPassword } = body;
+    return this.authService.resetPassword(username, token, newPassword);
   }
 }
