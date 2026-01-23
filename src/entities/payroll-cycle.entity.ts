@@ -4,7 +4,10 @@ import {
   Column,
   CreateDateColumn,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
+import { User } from './user.entity';
 import { PayrollSummary } from './payroll-summary.entity';
 
 @Entity('payroll_cycles')
@@ -28,6 +31,13 @@ export class PayrollCycle {
     cascade: true,
   })
   summaries: PayrollSummary[];
+
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @Column({ nullable: true })
+  userId: string;
 
   @CreateDateColumn()
   createdAt: Date;

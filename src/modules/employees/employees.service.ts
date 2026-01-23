@@ -38,24 +38,28 @@ export class EmployeesService {
     }
   }
 
-  async create(createEmployeeDto: CreateEmployeeDto) {
+  async create(createEmployeeDto: CreateEmployeeDto, userId: string) {
     if (createEmployeeDto.avatarUrl) {
       createEmployeeDto.avatarUrl = this.saveImage(createEmployeeDto.avatarUrl);
     }
-    const employee = this.employeeRepository.create(createEmployeeDto);
+    const employee = this.employeeRepository.create({
+      ...createEmployeeDto,
+      userId,
+    });
     return await this.employeeRepository.save(employee);
   }
 
-  async findAll() {
+  async findAll(userId: string) {
     return await this.employeeRepository.find({
+      where: { userId },
       relations: ['department'],
       order: { fullName: 'ASC' },
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, userId: string) {
     const employee = await this.employeeRepository.findOne({
-      where: { id },
+      where: { id, userId },
       relations: ['department'],
     });
     if (!employee) {
@@ -64,17 +68,21 @@ export class EmployeesService {
     return employee;
   }
 
-  async update(id: string, updateEmployeeDto: UpdateEmployeeDto) {
+  async update(
+    id: string,
+    updateEmployeeDto: UpdateEmployeeDto,
+    userId: string,
+  ) {
     if (updateEmployeeDto.avatarUrl) {
       updateEmployeeDto.avatarUrl = this.saveImage(updateEmployeeDto.avatarUrl);
     }
-    const employee = await this.findOne(id);
+    const employee = await this.findOne(id, userId);
     const updated = this.employeeRepository.merge(employee, updateEmployeeDto);
     return await this.employeeRepository.save(updated);
   }
 
-  async remove(id: string) {
-    const employee = await this.findOne(id);
+  async remove(id: string, userId: string) {
+    const employee = await this.findOne(id, userId);
     await this.employeeRepository.remove(employee);
     return { message: 'Empleado eliminado correctamente' };
   }

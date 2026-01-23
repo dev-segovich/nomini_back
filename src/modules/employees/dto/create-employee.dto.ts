@@ -43,4 +43,8 @@ export class CreateEmployeeDto {
   @IsString()
   @IsOptional()
   paymentFrequency?: string;
+
+  @IsDateString()
+  @IsOptional()
+  suspensionUntil?: string;
 }

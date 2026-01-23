@@ -7,6 +7,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Employee } from './employee.entity';
+import { User } from './user.entity';
 
 @Entity('penalizations')
 export class Penalization {
@@ -43,6 +44,13 @@ export class Penalization {
 
   @Column()
   employeeId: string;
+
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @Column({ nullable: true })
+  userId: string;
 
   @CreateDateColumn()
   createdAt: Date;

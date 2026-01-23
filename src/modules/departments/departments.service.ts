@@ -15,29 +15,30 @@ export class DepartmentsService {
     private readonly departmentRepository: Repository<Department>,
   ) {}
 
-  async create(createDepartmentDto: CreateDepartmentDto) {
+  async create(createDepartmentDto: CreateDepartmentDto, userId: string) {
     const { name } = createDepartmentDto;
 
     const existing = await this.departmentRepository.findOne({
-      where: { name },
+      where: { name, userId },
     });
     if (existing) {
-      throw new ConflictException('El departamento ya existe');
+      throw new ConflictException('El departamento ya existe para su cuenta');
     }
 
-    const department = this.departmentRepository.create({ name });
+    const department = this.departmentRepository.create({ name, userId });
     return await this.departmentRepository.save(department);
   }
 
-  async findAll() {
+  async findAll(userId: string) {
     return await this.departmentRepository.find({
+      where: { userId },
       order: { name: 'ASC' },
     });
   }
 
-  async remove(id: string) {
+  async remove(id: string, userId: string) {
     const department = await this.departmentRepository.findOne({
-      where: { id },
+      where: { id, userId },
     });
     if (!department) {
       throw new NotFoundException('Departamento no encontrado');

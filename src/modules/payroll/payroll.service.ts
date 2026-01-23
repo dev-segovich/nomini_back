@@ -23,14 +23,15 @@ export class PayrollService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async findAll() {
+  async findAll(userId: string) {
     return await this.cycleRepository.find({
+      where: { userId },
       relations: ['summaries'],
-      order: { date: 'DESC' },
+      order: { createdAt: 'DESC' },
     });
   }
 
-  async create(createDto: any) {
+  async create(createDto: any, userId: string) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -42,6 +43,7 @@ export class PayrollService {
       // Save the cycle
       const cycle = this.cycleRepository.create({
         ...cycleData,
+        userId,
       });
       const savedCycle = (await queryRunner.manager.save(
         cycle,
@@ -56,24 +58,37 @@ export class PayrollService {
         }),
       );
       await queryRunner.manager.save(summaryEntities);
+      savedCycle.summaries = summaryEntities;
 
       // Update loans if provided
       if (updatedLoans && Array.isArray(updatedLoans)) {
         for (const l of updatedLoans) {
-          await queryRunner.manager.update(Loan, l.id, {
-            remainingWeeks: l.remainingWeeks,
-            status: l.status,
+          // Verify loan belongs to user
+          const loan = await this.loanRepository.findOne({
+            where: { id: l.id, userId },
           });
+          if (loan) {
+            await queryRunner.manager.update(Loan, l.id, {
+              remainingWeeks: l.remainingWeeks,
+              status: l.status,
+            });
+          }
         }
       }
 
       // Update penalizations if provided
       if (updatedPenalizations && Array.isArray(updatedPenalizations)) {
         for (const p of updatedPenalizations) {
-          await queryRunner.manager.update(Penalization, p.id, {
-            remainingWeeks: p.remainingWeeks,
-            status: p.status,
+          // Verify penalization belongs to user
+          const penal = await this.penalizationRepository.findOne({
+            where: { id: p.id, userId },
           });
+          if (penal) {
+            await queryRunner.manager.update(Penalization, p.id, {
+              remainingWeeks: p.remainingWeeks,
+              status: p.status,
+            });
+          }
         }
       }
 
@@ -87,27 +102,43 @@ export class PayrollService {
     }
   }
 
-  async getLoans() {
+  async getLoans(userId: string) {
     return await this.loanRepository.find({
+      where: { userId },
       relations: ['employee'],
       order: { createdAt: 'DESC' },
     });
   }
 
-  async createLoan(loanData: any) {
-    const loan = this.loanRepository.create(loanData);
+  async createLoan(loanData: any, userId: string) {
+    // Optional: Verify employee belongs to user
+    const employee = await this.employeeRepository.findOne({
+      where: { id: loanData.employeeId, userId },
+    });
+    if (!employee)
+      throw new NotFoundException('Empleado no encontrado en su cuenta');
+
+    const loan = this.loanRepository.create({ ...loanData, userId });
     return await this.loanRepository.save(loan);
   }
 
-  async getPenalizations() {
+  async getPenalizations(userId: string) {
     return await this.penalizationRepository.find({
+      where: { userId },
       relations: ['employee'],
       order: { createdAt: 'DESC' },
     });
   }
 
-  async createPenalization(penalData: any) {
-    const penal = this.penalizationRepository.create(penalData);
+  async createPenalization(penalData: any, userId: string) {
+    // Optional: Verify employee belongs to user
+    const employee = await this.employeeRepository.findOne({
+      where: { id: penalData.employeeId, userId },
+    });
+    if (!employee)
+      throw new NotFoundException('Empleado no encontrado en su cuenta');
+
+    const penal = this.penalizationRepository.create({ ...penalData, userId });
     return await this.penalizationRepository.save(penal);
   }
 }

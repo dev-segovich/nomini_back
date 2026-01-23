@@ -8,6 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Department } from './department.entity';
+import { User } from './user.entity';
 
 @Entity('employees')
 export class Employee {
@@ -44,6 +45,16 @@ export class Employee {
 
   @Column({ nullable: true })
   departmentId: string;
+
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @Column({ nullable: true })
+  userId: string;
+
+  @Column({ type: 'date', nullable: true })
+  suspensionUntil: string;
 
   @CreateDateColumn()
   createdAt: Date;
