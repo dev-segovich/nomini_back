@@ -39,4 +39,8 @@ export class CreateEmployeeDto {
   @IsString()
   @IsOptional()
   status?: string;
+
+  @IsString()
+  @IsOptional()
+  paymentFrequency?: string;
 }

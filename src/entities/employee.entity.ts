@@ -35,6 +35,9 @@ export class Employee {
   @Column({ default: 'activo' })
   status: string;
 
+  @Column({ default: 'semanal' })
+  paymentFrequency: string;
+
   @ManyToOne(() => Department, { onDelete: 'SET NULL', eager: true })
   @JoinColumn({ name: 'departmentId' })
   department: Department;

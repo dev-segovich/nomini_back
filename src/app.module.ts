@@ -5,11 +5,18 @@ import { DatabaseModule } from './config/db.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
 import { EmployeesModule } from './modules/employees/employees.module';
+import { PayrollModule } from './modules/payroll/payroll.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 @Module({
-  imports: [DatabaseModule, AuthModule, DepartmentsModule, EmployeesModule],
+  imports: [
+    DatabaseModule,
+    AuthModule,
+    DepartmentsModule,
+    EmployeesModule,
+    PayrollModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,
