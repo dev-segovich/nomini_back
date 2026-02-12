@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsUUID,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateEmployeeDto {
   @IsString()
@@ -28,10 +29,12 @@ export class CreateEmployeeDto {
   @IsNotEmpty()
   hireDate: string;
 
+  @Type(() => Number)
   @IsNumber()
   @IsOptional()
   baseWeeklySalary?: number;
 
+  @Type(() => Number)
   @IsNumber()
   @IsOptional()
   weeklyBonus?: number;
