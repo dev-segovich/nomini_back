@@ -18,6 +18,9 @@ export class Employee {
   @Column()
   fullName: string;
 
+  @Column({ nullable: true })
+  email: string;
+
   @Column()
   position: string;
 

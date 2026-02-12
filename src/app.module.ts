@@ -8,6 +8,8 @@ import { EmployeesModule } from './modules/employees/employees.module';
 import { PayrollModule } from './modules/payroll/payroll.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { MailModule } from './modules/mail/mail.module';
+import { PdfModule } from './modules/pdf/pdf.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { AppService } from './app.service';
     DepartmentsModule,
     EmployeesModule,
     PayrollModule,
+    MailModule,
+    PdfModule,
   ],
   controllers: [AppController],
   providers: [

@@ -6,6 +6,8 @@ import { PayrollSummary } from '../../entities/payroll-summary.entity';
 import { Loan } from '../../entities/loan.entity';
 import { Penalization } from '../../entities/penalization.entity';
 import { Employee } from '../../entities/employee.entity';
+import { MailService } from '../mail/mail.service';
+import { PdfService } from '../pdf/pdf.service';
 
 @Injectable()
 export class PayrollService {
@@ -21,6 +23,8 @@ export class PayrollService {
     @InjectRepository(Employee)
     private readonly employeeRepository: Repository<Employee>,
     private readonly dataSource: DataSource,
+    private readonly mailService: MailService,
+    private readonly pdfService: PdfService,
   ) {}
 
   async findAll(userId: string) {
@@ -119,7 +123,34 @@ export class PayrollService {
       throw new NotFoundException('Empleado no encontrado en su cuenta');
 
     const loan = this.loanRepository.create({ ...loanData, userId });
-    return await this.loanRepository.save(loan);
+    const savedLoan = (await this.loanRepository.save(loan)) as unknown as Loan;
+
+    // Send email with PDF
+    try {
+      if (employee.email) {
+        const pdf = await this.pdfService.generateReceipt({
+          title: 'Comprobante de Préstamo',
+          type: 'loan',
+          employeeName: employee.fullName,
+          amount: savedLoan.amount,
+          totalWeeks: savedLoan.totalWeeks,
+          weeklyInstallment: savedLoan.weeklyInstallment,
+          notes: savedLoan.notes,
+        });
+
+        await this.mailService.sendMailWithAttachment(
+          employee.email,
+          'Nuevo Préstamo Registrado - Nomini',
+          `Hola ${employee.fullName}, se ha registrado un nuevo préstamo por un monto de $${savedLoan.amount}. Adjunto encontrarás el comprobante.`,
+          `comprobante_prestamo_${savedLoan.id.split('-')[0]}.pdf`,
+          pdf,
+        );
+      }
+    } catch (error) {
+      console.error('Error in post-loan creation email process:', error);
+    }
+
+    return savedLoan;
   }
 
   async getPenalizations(userId: string) {
@@ -139,6 +170,34 @@ export class PayrollService {
       throw new NotFoundException('Empleado no encontrado en su cuenta');
 
     const penal = this.penalizationRepository.create({ ...penalData, userId });
-    return await this.penalizationRepository.save(penal);
+    const savedPenal = (await this.penalizationRepository.save(penal)) as unknown as Penalization;
+
+    // Send email with PDF
+    try {
+      if (employee.email) {
+        const pdf = await this.pdfService.generateReceipt({
+          title: 'Comprobante de Penalización',
+          type: 'penalization',
+          employeeName: employee.fullName,
+          amount: savedPenal.amount,
+          category: savedPenal.category,
+          reason: savedPenal.reason,
+          totalWeeks: savedPenal.totalWeeks,
+          weeklyInstallment: savedPenal.weeklyInstallment,
+        });
+
+        await this.mailService.sendMailWithAttachment(
+          employee.email,
+          'Nueva Penalización Registrada - Nomini',
+          `Hola ${employee.fullName}, se ha registrado una nueva penalización por un monto de $${savedPenal.amount}. Adjunto encontrarás el comprobante.`,
+          `comprobante_penalizacion_${savedPenal.id.split('-')[0]}.pdf`,
+          pdf,
+        );
+      }
+    } catch (error) {
+      console.error('Error in post-penalization creation email process:', error);
+    }
+
+    return savedPenal;
   }
 }

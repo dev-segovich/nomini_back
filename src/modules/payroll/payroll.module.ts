@@ -5,6 +5,8 @@ import { PayrollSummary } from '../../entities/payroll-summary.entity';
 import { Loan } from '../../entities/loan.entity';
 import { Penalization } from '../../entities/penalization.entity';
 import { Employee } from '../../entities/employee.entity';
+import { MailModule } from '../mail/mail.module';
+import { PdfModule } from '../pdf/pdf.module';
 import { PayrollController } from './payroll.controller';
 import { PayrollService } from './payroll.service';
 
@@ -17,6 +19,8 @@ import { PayrollService } from './payroll.service';
       Penalization,
       Employee,
     ]),
+    MailModule,
+    PdfModule,
   ],
   controllers: [PayrollController],
   providers: [PayrollService],
