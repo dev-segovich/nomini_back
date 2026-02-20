@@ -5,6 +5,7 @@ import {
   UseGuards,
   Request,
   Get,
+  Patch,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -41,6 +42,12 @@ export class AuthController {
   @Get('profile')
   async getProfile(@Request() req) {
     return this.authService.getProfile(req.user.sub);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('profile')
+  async updateProfile(@Request() req, @Body() body: { avatarUrl?: string }) {
+    return this.authService.updateProfile(req.user.sub, body);
   }
 
   /**

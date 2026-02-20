@@ -65,6 +65,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         username: user.username,
+        avatarUrl: user.avatarUrl,
       },
       access_token,
     };
@@ -115,6 +116,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         username: user.username,
+        avatarUrl: user.avatarUrl,
       },
       access_token: this.jwtService.sign(payload),
     };
@@ -126,7 +128,15 @@ export class AuthService {
   async getProfile(userId: string) {
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      select: ['id', 'email', 'username', 'isActive', 'createdAt', 'updatedAt'],
+      select: [
+        'id',
+        'email',
+        'username',
+        'avatarUrl',
+        'isActive',
+        'createdAt',
+        'updatedAt',
+      ],
     });
 
     if (!user) {
@@ -134,6 +144,29 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  async updateProfile(userId: string, data: { avatarUrl?: string }) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    if (data.avatarUrl !== undefined) {
+      user.avatarUrl = data.avatarUrl;
+    }
+
+    await this.userRepository.save(user);
+
+    return {
+      message: 'Perfil actualizado exitosamente',
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        avatarUrl: user.avatarUrl,
+      },
+    };
   }
 
   /**
