@@ -22,7 +22,7 @@ import { PayrollSummary } from '../entities/payroll-summary.entity';
         PayrollCycle,
         PayrollSummary,
       ],
-      synchronize: true,
+      synchronize: false,
       logging: true,
     }),
   ],
